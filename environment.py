@@ -7,35 +7,28 @@ class Agent:
         self.size = size
         self.rows = rows
         self.grid_size = size // rows
-        self.x = self.grid_size * (rows // 2)  # Initialize x coordinate
+        self.x = self.grid_size * (rows // 2)
         self.y = self.grid_size * (rows // 2)
-        self.color = (0, 255, 0)
+        self.color = (0, 255, 0) 
+        self.directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        self.direction_idx = 0  
 
     def draw(self, window):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.grid_size, self.grid_size))
 
     def decide_move(self, rewards):
-        # current_position = (self.x, self.y)
-        rewards[:] = [reward for reward in rewards if not (reward[0] == self.x and reward[1] == self.y)]
+        action = random.choice(['move forward', 'turn left', 'turn right'])
+        print(f"Action: {action}")
 
-        closest_reward = None
-        min_distance = float('inf')
-        for reward in rewards:
-            distance = abs(reward[0] - self.x) + abs(reward[1] - self.y)
-            if distance < min_distance:
-                min_distance = distance
-                closest_reward = reward
+        if action == 'move forward':
+            direction = self.directions[self.direction_idx]
+            self.x += direction[0] * self.grid_size
+            self.y += direction[1] * self.grid_size
+        elif action == 'turn left':
+            self.direction_idx = (self.direction_idx - 1) % 4
+        elif action == 'turn right':
+            self.direction_idx = (self.direction_idx + 1) % 4
 
-        if closest_reward:
-            if closest_reward[0] > self.x:
-                self.x += self.grid_size
-            elif closest_reward[0] < self.x:
-                self.x -= self.grid_size
-            if closest_reward[1] > self.y:
-                self.y += self.grid_size
-            elif closest_reward[1] < self.y:
-                self.y -= self.grid_size
-                
 class Environment:
     def __init__(self, size, rows, num_rewards):
         pygame.init()
@@ -50,13 +43,10 @@ class Environment:
     def generate_rewards(self):
         grid_size = self.size // self.rows
         rewards_list = []
-        occupied_positions = set()
-        while len(rewards_list) < 89:
+        while len(rewards_list) < self.num_rewards:
             x = random.randint(0, self.rows - 1) * grid_size
             y = random.randint(0, self.rows - 1) * grid_size
-            if (x, y) not in occupied_positions:
-                rewards_list.append((x, y))
-                occupied_positions.add((x, y))
+            rewards_list.append((x, y))
         return rewards_list
 
     def draw_grid(self):
@@ -89,8 +79,7 @@ class Environment:
             print(f"An error occurred: {e}")
         finally:
             pygame.quit()
-            sys.exit()
 
 if __name__ == "__main__":
-    env = Environment(640, 32, 10)
+    env = Environment(640, 32, 86)
     env.run()
