@@ -2,6 +2,12 @@ import pygame
 import sys
 import random
 
+''' TODO:
+    - The agent is not respecting the grid
+    - Figure out why it's being so slow
+    - Have better understanding of agent's fitness
+'''
+
 class Agent:
     def __init__(self, size, rows):
         self.size = size
@@ -18,7 +24,6 @@ class Agent:
 
     def decide_move(self, rewards):
         action = random.choice(['move forward', 'turn left', 'turn right'])
-        print(f"Action: {action}")
 
         if action == 'move forward':
             direction = self.directions[self.direction_idx]
@@ -28,6 +33,14 @@ class Agent:
             self.direction_idx = (self.direction_idx - 1) % 4
         elif action == 'turn right':
             self.direction_idx = (self.direction_idx + 1) % 4
+
+        self.collect_rewards(rewards)
+
+    def collect_rewards(self, rewards):
+        for reward in rewards:
+            if reward[0] == self.x and reward[1] == self.y:
+                rewards.remove(reward)
+                break
 
 class Environment:
     def __init__(self, size, rows, num_rewards):
@@ -66,19 +79,17 @@ class Environment:
     def run(self):
         running = True
         clock = pygame.time.Clock()
-        try:
-            while running:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
-                self.agent.decide_move(self.rewards_list)
-                self.redraw()
-                clock.tick(5)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        finally:
-            pygame.quit()
+            self.agent.decide_move(self.rewards_list)
+            self.redraw()
+            clock.tick(5)
+
+        pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     env = Environment(640, 32, 86)
