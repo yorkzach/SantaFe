@@ -7,7 +7,7 @@ class Agent:
         self.size = size
         self.rows = rows
         self.grid_size = size // rows
-        # self.x = self.grid_size * (rows // 2) 
+        self.x = self.grid_size * (rows // 2)  # Initialize x coordinate
         self.y = self.grid_size * (rows // 2)
         self.color = (0, 255, 0)
 
@@ -46,7 +46,6 @@ class Environment:
         pygame.display.set_caption("Environment")
 
     def generate_rewards(self):
-        ''' This method generates random rewards within the grid '''
         grid_size = self.size // self.rows
         rewards_list = []
         occupied_positions = set()
@@ -59,7 +58,6 @@ class Environment:
         return rewards_list
 
     def draw_grid(self):
-        ''' This method uses pygame to generate the environment for the agent '''
         grid_size = self.size // self.rows
         for i in range(self.rows + 1):
             pygame.draw.line(self.window, (255, 255, 255), (i * grid_size, 0), (i * grid_size, self.size))
@@ -69,24 +67,27 @@ class Environment:
         self.agent.draw(self.window)
 
     def redraw(self):
-        ''' This method is used to regenerate the environment '''
         self.window.fill((0, 0, 0))
         self.draw_grid()
         pygame.display.update()
 
     def run(self):
-        ''' This method sets up and runs the game loop '''
         running = True
         clock = pygame.time.Clock()
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        try:
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
 
-            self.agent.decide_move(self.rewards_list) 
-            self.redraw()
-            clock.tick(5) 
+                self.agent.decide_move(self.rewards_list)
+                self.redraw()
+                clock.tick(5)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            pygame.quit()
+            sys.exit()
 
 if __name__ == "__main__":
     env = Environment(640, 32, 10)
