@@ -15,7 +15,9 @@ class Agent:
         pygame.draw.rect(window, self.color, (self.x, self.y, self.grid_size, self.grid_size))
 
     def decide_move(self, rewards):
-        # Find the closest reward
+        # current_position = (self.x, self.y)
+        rewards[:] = [reward for reward in rewards if not (reward[0] == self.x and reward[1] == self.y)]
+
         closest_reward = None
         min_distance = float('inf')
         for reward in rewards:
@@ -33,7 +35,7 @@ class Agent:
                 self.y += self.grid_size
             elif closest_reward[1] < self.y:
                 self.y -= self.grid_size
-
+                
 class Environment:
     def __init__(self, size, rows, num_rewards):
         pygame.init()
